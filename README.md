@@ -5,7 +5,8 @@
 * [x] Create a 10m × 10m world
 * [x] Add boundary walls
 
-* [ ] Load the humanoid model
+* [x] Load the humanoid model
+* [ ] Add Controls to the model to make it stand upright
 * [ ] Spawn it at a given `(x, y, theta)`
 * [ ] Verify position and orientation are correct
 
