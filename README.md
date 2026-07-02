@@ -2,8 +2,8 @@
 
 ## Goals
 
-* [ ] Create a 10m × 10m world
-* [ ] Add boundary walls
+* [x] Create a 10m × 10m world
+* [x] Add boundary walls
 
 * [ ] Load the humanoid model
 * [ ] Spawn it at a given `(x, y, theta)`

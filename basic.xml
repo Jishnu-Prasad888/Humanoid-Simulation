@@ -1,5 +1,4 @@
 <mujoco model="hello">
-
     <option gravity="0 0 -9.81"/>
 
     <worldbody>
@@ -7,24 +6,48 @@
         <geom
             type="plane"
             size="10 10 .1"
-            solref="-1000 -10"
-            solimp="0.99 0.99 0.001"
             rgba=".8 .8 .8 1"/>
 
-        <body pos="0 0 1">
+        <!-- +X wall -->
+        <geom
+            type="box"
+            pos="10 0 5"
+            size="0.1 10 5"
+            rgba="1 1 1 1"/>
 
+        <!-- -X wall -->
+        <geom
+            type="box"
+            pos="-10 0 5"
+            size="0.1 10 5"
+            rgba="1 1 1 1"/>
+
+        <!-- +Y wall -->
+        <geom
+            type="box"
+            pos="0 10 5"
+            size="10 0.1 5"
+            rgba="1 1 1 1"/>
+
+        <!-- -Y wall -->
+        <geom
+            type="box"
+            pos="0 -10 5"
+            size="10 0.1 5"
+            rgba="1 1 1 1"/>
+
+        <body pos="0 0 1">
             <joint type="free"/>
 
             <geom
                 type="sphere"
                 size="0.1"
                 mass="1"
-                solref="-1000 -10"
-                solimp="0.99 0.99 0.001"
+                solref="0.005 0.2"
+                solimp="0.99 0.999 0.0001"
                 rgba="1 0 0 1"/>
 
         </body>
 
     </worldbody>
-
 </mujoco>
