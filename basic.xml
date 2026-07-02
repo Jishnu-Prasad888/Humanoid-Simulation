@@ -1,0 +1,25 @@
+<mujoco model="hello">
+
+    <option gravity="0 0 -9.81"/>
+
+    <worldbody>
+
+        <geom
+            type="plane"
+            size="10 10 .1"
+            rgba=".8 .8 .8 1"/>
+
+        <body pos="0 0 1">
+
+            <joint type="free"/>
+
+            <geom
+                type="sphere"
+                size="0.1"
+                rgba="1 0 0 1"/>
+
+        </body>
+
+    </worldbody>
+
+</mujoco>
