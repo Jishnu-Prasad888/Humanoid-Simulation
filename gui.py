@@ -1,6 +1,7 @@
 import json
 import os
 import customtkinter as ctk
+import tkinter.filedialog as fd
 
 CONFIG_PATH = os.getenv("HUMANOID_CONFIG", "config.json")
 
@@ -100,7 +101,8 @@ class ConfigUI(ctk.CTk):
         self.title("Humanoid Controller Config")
         self.geometry("820x820")
         self.resizable(True, True)
-        self.cfg = ensure_config(CONFIG_PATH)
+        self.config_path = CONFIG_PATH
+        self.cfg = ensure_config(self.config_path)
 
         self.scroll = ctk.CTkScrollableFrame(self)
         self.scroll.pack(fill="both", expand=True, padx=10, pady=10)
@@ -113,9 +115,22 @@ class ConfigUI(ctk.CTk):
         self.build_pose()
         self.build_misc()
 
+        action_row = ctk.CTkFrame(self.scroll)
+        action_row.pack(fill="x", pady=8, padx=6)
+        ctk.CTkButton(action_row, text="Save Now", command=self.save, width=120).pack(side="left", padx=4, pady=4)
+        ctk.CTkButton(action_row, text="Save As...", command=self.save_as, width=120).pack(side="left", padx=4, pady=4)
+
     def save(self):
-        with open(CONFIG_PATH, "w") as f:
+        with open(self.config_path, "w") as f:
             json.dump(self.cfg, f, indent=2)
+
+    def save_as(self):
+        path = fd.asksaveasfilename(defaultextension=".json",
+                                    initialfile=os.path.basename(self.config_path),
+                                    filetypes=[("JSON files", "*.json"), ("All files", "*.*")])
+        if path:
+            self.config_path = path
+            self.save()
 
     def mark_change(self):
         self.save()
