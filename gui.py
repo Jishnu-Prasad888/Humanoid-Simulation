@@ -117,12 +117,18 @@ class ConfigUI(ctk.CTk):
 
         action_row = ctk.CTkFrame(self.scroll)
         action_row.pack(fill="x", pady=8, padx=6)
-        ctk.CTkButton(action_row, text="Save Now", command=self.save, width=120).pack(side="left", padx=4, pady=4)
-        ctk.CTkButton(action_row, text="Save As...", command=self.save_as, width=120).pack(side="left", padx=4, pady=4)
+        self.path_label = ctk.CTkLabel(action_row, text=f"Active: {os.path.abspath(self.config_path)}", anchor="w")
+        self.path_label.pack(fill="x", padx=4, pady=4)
+        btn_row = ctk.CTkFrame(self.scroll)
+        btn_row.pack(fill="x", pady=4, padx=6)
+        ctk.CTkButton(btn_row, text="Save Now", command=self.save, width=120).pack(side="left", padx=4, pady=4)
+        ctk.CTkButton(btn_row, text="Save As...", command=self.save_as, width=120).pack(side="left", padx=4, pady=4)
+        ctk.CTkButton(btn_row, text="Import...", command=self.import_into_current, width=120).pack(side="left", padx=4, pady=4)
 
     def save(self):
         with open(self.config_path, "w") as f:
             json.dump(self.cfg, f, indent=2)
+        self.update_path_label()
 
     def save_as(self):
         path = fd.asksaveasfilename(defaultextension=".json",
@@ -132,8 +138,29 @@ class ConfigUI(ctk.CTk):
             self.config_path = path
             self.save()
 
+    def import_into_current(self):
+        path = fd.askopenfilename(filetypes=[("JSON files", "*.json"), ("All files", "*.*")])
+        if not path:
+            return
+        with open(path, "r") as f:
+            cfg_in = json.load(f)
+        merged = json.loads(json.dumps(DEFAULT_CONFIG))
+        def deep_merge(dst, src):
+            for k, v in src.items():
+                if isinstance(v, dict) and k in dst and isinstance(dst[k], dict):
+                    deep_merge(dst[k], v)
+                else:
+                    dst[k] = v
+        deep_merge(merged, cfg_in)
+        self.cfg = merged
+        self.refresh_fields()
+        self.save()
+
     def mark_change(self):
         self.save()
+
+    def update_path_label(self):
+        self.path_label.configure(text=f"Active: {os.path.abspath(self.config_path)}")
 
     def build_general(self):
         frame = ctk.CTkFrame(self.scroll)
@@ -242,6 +269,41 @@ class ConfigUI(ctk.CTk):
         self.cfg["smoothing"] = self.smoothing_field.get_value()
         self.cfg["i_clamp"] = self.i_clamp_field.get_value()
         self.mark_change()
+
+    def refresh_fields(self):
+        # general
+        self.pin_root_var.set(self.cfg.get("pin_root", True))
+
+        # friction
+        fr = self.cfg.get("friction", [3.0, 0.1, 0.01])
+        for i, f in enumerate(self.friction_fields):
+            f.set_value(fr[i] if i < len(fr) else 0.0)
+
+        # gains
+        for (section, g, key), field in self.fields.items():
+            if section != "gains":
+                continue
+            field.set_value(self.cfg.get("gains", {}).get(g, {}).get(key, 0.0))
+
+        # pose
+        self.root_z_field.set_value(self.cfg.get("pose", {}).get("root_z", 1.05))
+
+        def update_pose(key, count):
+            arr = self.cfg.get("pose", {}).get(key, [0.0] * count)
+            for i in range(count):
+                self.fields[("pose", key, i)].set_value(arr[i] if i < len(arr) else 0.0)
+
+        update_pose("abdomen", 3)
+        update_pose("right_leg", 6)
+        update_pose("left_leg", 6)
+        update_pose("right_arm", 3)
+        update_pose("left_arm", 3)
+
+        # misc
+        self.smoothing_field.set_value(self.cfg.get("smoothing", 0.4))
+        self.i_clamp_field.set_value(self.cfg.get("i_clamp", 0.2))
+
+        self.update_path_label()
 
 
 def main():
